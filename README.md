@@ -37,7 +37,7 @@
 - Tener instalado **Node.js** y **npm** o **yarn**
 
 # Clona el repositorio
-git clone https://github.com/tu-usuario/wonder-kids.git
+git clone https://github.com/cafalco96/kid-wonders
 
 cd wonder-kids
 
