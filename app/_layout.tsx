@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, View } from "react-native";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -25,13 +26,34 @@ export default function RootLayout() {
     );
   }
 
+  const headerBackgroundColor = "#FAFAFA";
+  const headerTintColor = "#000"; // negro para iconos
+
+  const headerTitleStyle = {
+    fontWeight: "bold",
+    fontSize: 18,
+    color: headerTintColor,
+    fontFamily: "SpaceMono",
+  };
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        {/* Ocultamos el header solo en la pantalla principal */}
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: headerBackgroundColor },
+          headerTintColor: headerTintColor,
+          headerBackTitle: "",
+          headerBackImage: () => (
+            <Ionicons
+              name="chevron-back"
+              size={42} 
+              color={headerTintColor}
+              style={{ marginLeft: 10 }}
+            />
+          ),
+        }}
+      >
         <Stack.Screen name="index" options={{ headerShown: false }} />
-
-        {/* Estas pantallas sí tendrán header con botón de regreso */}
         <Stack.Screen name="emociones" options={{ title: "" }} />
         <Stack.Screen name="necesidades" options={{ title: "" }} />
       </Stack>
