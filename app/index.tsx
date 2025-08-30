@@ -1,8 +1,17 @@
 // app/index.tsx (HomeScreen)
 import React from "react";
 import { useRouter } from "expo-router";
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getArasaacImageUrl } from "../utils/arasaac";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import { getArasaacImageUrl } from "@/utils/arasaac";
+import { useOneTap } from "@/hooks/useOneTap";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -18,18 +27,23 @@ export default function HomeScreen() {
     label: string;
     onPress: () => void;
     color: string;
-  }) => (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: color, width: width * 0.7, height: width * 0.7 }]}
-      onPress={onPress}
-      accessible={true}
-      accessibilityLabel={label}
-      accessibilityRole="button"
-    >
-      <Image source={{ uri: getArasaacImageUrl(id) }} style={styles.cardImage} resizeMode="contain" />
-      <Text style={styles.cardText}>{label}</Text>
-    </TouchableOpacity>
-  );
+  }) => {
+    // evita doble toque al entrar
+    const { onPress: safePress } = useOneTap(onPress, 700);
+
+    return (
+      <TouchableOpacity
+        style={[styles.card, { backgroundColor: color, width: width * 0.7, height: width * 0.7 }]}
+        onPress={safePress}
+        accessible
+        accessibilityLabel={label}
+        accessibilityRole="button"
+      >
+        <Image source={{ uri: getArasaacImageUrl(id) }} style={styles.cardImage} resizeMode="contain" />
+        <Text style={styles.cardText}>{label}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>

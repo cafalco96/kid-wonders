@@ -1,7 +1,21 @@
+// app/screen1.tsx
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { getArasaacImageUrl } from '../utils/arasaac';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 
+import PictogramModal from "@/components/PictogramModal";
+import { useOneTap } from "@/hooks/useOneTap";
+import { getArasaacImageUrl } from "@/utils/arasaac";
+
+// Emociones con IDs reales de ARASAAC (desde main)
 const emotions = [
   { id: 13354, name: "Feliz", color: "#FFD54F" },
   { id: 35545, name: "Triste", color: "#64B5F6" },
@@ -14,108 +28,119 @@ const emotions = [
   { id: 30620, name: "Adolorido", color: "#F06292" },
   { id: 38481, name: "Enfermo", color: "#81C784" },
   { id: 38050, name: "Tranquilo", color: "#4DB6AC" },
-  { id: 6992, name: "Confundido", color: "#7986CB" },
+  { id: 6992,  name: "Confundido", color: "#7986CB" },
 ];
 
 export default function Screen1() {
   const router = useRouter();
   const { width } = useWindowDimensions();
 
-  const handleEmotionPress = (emotion: { id: number; name: string; color: string }) => {
-    console.log(`Emoción seleccionada: ${emotion.name}`);
-    //Lógica de boton para que vaya al modal
-  };
+  // Estado para el modal
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<{ id: number; name: string } | null>(null);
+
+  // OneTap para evitar doble toque
+  const { onPress: onEmotionSafePress } = useOneTap(
+    (e: { id: number; name: string }) => {
+      setSelected(e);
+      setOpen(true);
+    },
+    700
+  );
 
   const isTwoColumns = width >= 350;
 
-  const emotionPairs = [];
+  // Pares para filas 2x2
+  const emotionPairs: Array<Array<(typeof emotions)[number]>> = [];
   for (let i = 0; i < emotions.length; i += 2) {
-    emotionPairs.push([emotions[i], emotions[i + 1]].filter(Boolean));
+    emotionPairs.push([emotions[i], emotions[i + 1]].filter(Boolean) as any);
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={[styles.title, { fontSize: isTwoColumns ? 44 : 38 }]}>¿Cómo te sientes?</Text>
-        {emotionPairs.map((pair, pairIndex) => (
-          <View
-            key={pairIndex}
-            style={[
-              styles.emotionRow,
-              { flexDirection: isTwoColumns ? 'row' : 'column', alignItems: 'center' },
-            ]}
-          >
-            {pair.map((emotion) => (
-              <TouchableOpacity
-                key={emotion.id}
-                style={[
-                  styles.emotionContainer,
-                  {
-                    backgroundColor: emotion.color,
-                    width: isTwoColumns ? '45%' : '90%',
-                    marginBottom: isTwoColumns ? 0 : 20,
-                  },
-                ]}
-                onPress={() => handleEmotionPress(emotion)}
-                accessible={true}
-                accessibilityLabel={`Emoción: ${emotion.name}`}
-                accessibilityRole="button"
-              >
-                <Image
-                  source={{ uri: getArasaacImageUrl(emotion.id) }}
-                  style={[styles.emotionImage, { width: isTwoColumns ? 125 : 100, height: isTwoColumns ? 125 : 100 }]}
-                  resizeMode="contain"
-                />
-                <Text style={styles.emotionText}>{emotion.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+    <>
+      <ScrollView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={[styles.title, { fontSize: isTwoColumns ? 44 : 38 }]}>
+            ¿Cómo te sientes?
+          </Text>
+
+          {emotionPairs.map((pair, idx) => (
+            <View
+              key={idx}
+              style={[
+                styles.emotionRow,
+                { flexDirection: isTwoColumns ? "row" : "column", alignItems: "center" },
+              ]}
+            >
+              {pair.map((emotion) => (
+                <TouchableOpacity
+                  key={emotion.id}
+                  style={[
+                    styles.emotionContainer,
+                    {
+                      backgroundColor: emotion.color,
+                      width: isTwoColumns ? "45%" : "90%",
+                      marginBottom: isTwoColumns ? 0 : 20,
+                    },
+                  ]}
+                  onPress={() => onEmotionSafePress({ id: emotion.id, name: emotion.name })}
+                  accessible
+                  accessibilityLabel={`Emoción: ${emotion.name}`}
+                  accessibilityRole="button"
+                >
+                  <Image
+                    source={{ uri: getArasaacImageUrl(emotion.id) }}
+                    style={[
+                      styles.emotionImage,
+                      { width: isTwoColumns ? 125 : 100, height: isTwoColumns ? 125 : 100 },
+                    ]}
+                    resizeMode="contain"
+                  />
+                  <Text style={styles.emotionText}>{emotion.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+
+          <TouchableOpacity onPress={useOneTap(() => router.back()).onPress} style={{ marginTop: 24 }}>
+            <Text style={{ fontSize: 18, textDecorationLine: "underline", color: "#333" }}>
+              Volver
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Modal con imagen real desde ARASAAC */}
+      <PictogramModal
+        visible={open && !!selected}
+        onClose={() => setOpen(false)}
+        label={selected ? `Estoy ${selected.name}` : ""}
+        imageSource={selected ? { uri: getArasaacImageUrl(selected.id) } : undefined}
+        autoCloseMs={5000}
+        speakOnOpen
+        speechLang="es-ES"
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  title: {
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-    color: '#333',
-  },
-  emotionRow: {
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 20,
-  },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  content: { padding: 20, alignItems: "center" },
+  title: { fontWeight: "bold", marginBottom: 30, textAlign: "center", color: "#333" },
+  emotionRow: { justifyContent: "space-around", width: "100%", marginBottom: 20 },
   emotionContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 15,
     borderRadius: 15,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     minHeight: 150,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
-  emotionImage: {
-    marginBottom: 10,
-  },
-  emotionText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#333',
-    marginTop: 5,
-  },
+  emotionImage: { marginBottom: 10 },
+  emotionText: { fontSize: 22, fontWeight: "bold", textAlign: "center", color: "#333", marginTop: 5 },
 });
