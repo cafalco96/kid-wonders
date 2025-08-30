@@ -1,14 +1,15 @@
 import { useRouter } from "expo-router";
 import { Button, StyleSheet, View } from "react-native";
+import OneTapButton from "@/components/OneTapButton";
 
 export default function HomeScreen() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <Button title="Emociones" onPress={() => router.push("/emociones")} />
+      <OneTapButton title="Emociones" onPress={() => router.push("/emociones")} />
       <View style={{ height: 20 }} />
-      <Button title="Necesidades" onPress={() => router.push("/necesidades")} />
+      <OneTapButton title="Necesidades" onPress={() => router.push("/necesidades")} />
     </View>
   );
 }

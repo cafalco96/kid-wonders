@@ -4,30 +4,33 @@ import { Button, StyleSheet, Text, View, ImageSourcePropType } from "react-nativ
 
 import PictogramModal from "@/components/PictogramModal";
 import React, { useState } from "react";
+import { useOneTap } from "@/hooks/useOneTap";
+
 type Emotion = {
-  label: string;               // lo que dirá el modal
-  img: ImageSourcePropType;    // imagen a mostrar
+  label: string;
+  img: ImageSourcePropType;
 };
 export default function Screen1() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [emotion, setEmotion] = useState<Emotion | null>(null);
 
-  const show = (e: Emotion) => {
+  const { onPress: showSafe } = useOneTap((e: Emotion) => {
     setEmotion(e);
     setOpen(true);
-  };
+  }, 700);
+
   return (
 
     <View style={styles.container}>
-      <Button title="Feliz"   onPress={() => show({ label: "Estoy Feliz",   img: require("../assets/images/feliz.png") })} />
-      <Button title="Triste"  onPress={() => show({ label: "Estoy Triste",  img: require("../assets/images/triste.png") })} />
-      <Button title="Enojado" onPress={() => show({ label: "Estoy Enojado", img: require("../assets/images/enojado.png") })} />
-      <Button title="Asustado"onPress={() => show({ label: "Estoy Asustado",img: require("../assets/images/asustado.png") })} />
+      <Button title="Feliz"   onPress={() => showSafe({ label: "Estoy Feliz",   img: require("../assets/images/feliz.png") })} />
+      <Button title="Triste"  onPress={() => showSafe({ label: "Estoy Triste",  img: require("../assets/images/triste.png") })} />
+      <Button title="Enojado" onPress={() => showSafe({ label: "Estoy Enojado", img: require("../assets/images/enojado.png") })} />
+      <Button title="Asustado"onPress={() => showSafe({ label: "Estoy Asustado",img: require("../assets/images/asustado.png") })} />
 
 
       <Text style={styles.title}>¡Bienvenido a la Pantalla 1!</Text>
-      <Button title="Volver" onPress={() => router.back()} />
+      <Button title="Volver" onPress={useOneTap(() => router.back()).onPress} />
 
       <PictogramModal
         visible={open && !!emotion}
