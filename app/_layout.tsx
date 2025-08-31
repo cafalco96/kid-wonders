@@ -1,9 +1,9 @@
+import { useColorScheme } from "@/hooks/useColorScheme";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import * as SplashScreen from "expo-splash-screen";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -13,7 +13,7 @@ export default function RootLayout() {
   useEffect(() => {
     const timer = setTimeout(() => {
       SplashScreen.hideAsync().catch(() => {});
-    }, 3000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, []);
 
