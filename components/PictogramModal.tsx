@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import { Modal, View, Text, Image, Pressable, AccessibilityInfo, Animated, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, Image, Modal, Pressable, StyleSheet, Text } from "react-native";
 
 type PictogramModalProps = {
   visible: boolean;
@@ -19,6 +19,7 @@ type PictogramModalProps = {
   speakOnOpen?: boolean;
   /** idioma para TTS (default "es-ES") */
   speechLang?: string;
+  color?: string; 
 };
 
 export default function PictogramModal({
@@ -29,13 +30,17 @@ export default function PictogramModal({
   autoCloseMs = 5000,
   speakOnOpen = true,
   speechLang = "es-ES",
+  color, 
 }: PictogramModalProps) {
   const fade = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.95)).current;
+  const [secondsLeft, setSecondsLeft] = useState(Math.round(autoCloseMs / 1000));
   const announcement = useMemo(() => ` ${label}`, [label]); // evita recálculos
 
   useEffect(() => {
     if (!visible) return;
+
+    setSecondsLeft(Math.round(autoCloseMs / 1000)); // reinicia al abrir
 
     // animación
     Animated.parallel([
@@ -64,8 +69,13 @@ export default function PictogramModal({
       handleClose();
     }, autoCloseMs);
 
+    const interval = setInterval(() => {
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+
     return () => {
       clearTimeout(t);
+      clearInterval(interval);
       Speech.stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +137,10 @@ export default function PictogramModal({
         {/* pictograma */}
         <Image
           source={imageSource}
-          style={styles.image}
+          style={[
+            styles.image,
+            { backgroundColor: color ? color + "E6" : "white" }
+          ]}
           resizeMode="contain"
           accessibilityIgnoresInvertColors
         />
@@ -150,7 +163,7 @@ export default function PictogramModal({
           importantForAccessibility="no"
         />
         <Text style={styles.caption} accessibilityElementsHidden importantForAccessibility="no">
-          Se cerrará en {Math.round(autoCloseMs / 1000)} s
+          Se cerrará en {secondsLeft} s
         </Text>
       </Animated.View>
     </Modal>
@@ -189,7 +202,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 12,
     borderRadius: 16,
-    backgroundColor: "#F1F1F1",
   },
   title: {
     fontSize: 28,
