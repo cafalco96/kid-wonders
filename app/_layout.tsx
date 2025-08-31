@@ -1,56 +1,28 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, View } from "react-native";
-
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Ionicons } from "@expo/vector-icons";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
-
-  if (!loaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
-
-  const headerBackgroundColor = "#FAFAFA";
-  const headerTintColor = "#000"; // negro para iconos
-
-  const headerTitleStyle = {
-    fontWeight: "bold",
-    fontSize: 18,
-    color: headerTintColor,
-    fontFamily: "SpaceMono",
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      SplashScreen.hideAsync().catch(() => {});
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: headerBackgroundColor },
-          headerTintColor: headerTintColor,
-          headerBackTitle: "",
-          headerBackImage: () => (
-            <Ionicons
-              name="chevron-back"
-              size={42} 
-              color={headerTintColor}
-              style={{ marginLeft: 10 }}
-            />
-          ),
+          headerStyle: { backgroundColor: "#FAFAFA" },
+          headerTintColor: "#000",
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
