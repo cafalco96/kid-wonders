@@ -1,6 +1,7 @@
 // app/index.tsx (HomeScreen)
-import React from "react";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import React from "react";
 import {
   Dimensions,
   Image,
@@ -10,8 +11,8 @@ import {
   View,
 } from "react-native";
 
-import { getArasaacImageUrl } from "@/utils/arasaac";
 import { useOneTap } from "@/hooks/useOneTap";
+import { getArasaacImageUrl } from "@/utils/arasaac";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -29,7 +30,10 @@ export default function HomeScreen() {
     color: string;
   }) => {
     // evita doble toque al entrar
-    const { onPress: safePress } = useOneTap(onPress, 700);
+    const { onPress: safePress } = useOneTap(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      onPress();
+    }, 700);
 
     return (
       <TouchableOpacity

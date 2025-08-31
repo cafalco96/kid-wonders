@@ -1,17 +1,15 @@
 // app/screen1.tsx
-import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
 
+import { OptionButton } from "@/components/OptionButton";
 import PictogramModal from "@/components/PictogramModal";
 import { useOneTap } from "@/hooks/useOneTap";
 import { getArasaacImageUrl } from "@/utils/arasaac";
@@ -29,7 +27,7 @@ const emotions = [
   { id: 30620, name: "Adolorido", color: "#F06292" },
   { id: 38481, name: "Enfermo", color: "#81C784" },
   { id: 38050, name: "Tranquilo", color: "#4DB6AC" },
-  { id: 6992,  name: "Confundido", color: "#7986CB" },
+  { id: 6992, name: "Confundido", color: "#7986CB" },
 ];
 
 export default function Screen1() {
@@ -38,7 +36,11 @@ export default function Screen1() {
 
   // Estado para el modal
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: number; name: string; color: string } | null>(null);
+  const [selected, setSelected] = useState<{
+    id: number;
+    name: string;
+    color: string;
+  } | null>(null);
 
   // OneTap para evitar doble toque
   const { onPress: onEmotionSafePress } = useOneTap(
@@ -70,38 +72,25 @@ export default function Screen1() {
               key={idx}
               style={[
                 styles.emotionRow,
-                { flexDirection: isTwoColumns ? "row" : "column", alignItems: "center" },
+                {
+                  flexDirection: isTwoColumns ? "row" : "column",
+                  alignItems: "center",
+                },
               ]}
             >
               {pair.map((emotion) => (
-                <TouchableOpacity
+                <OptionButton
                   key={emotion.id}
-                  style={[
-                    styles.emotionContainer,
-                    {
-                      backgroundColor: emotion.color,
-                      width: isTwoColumns ? "45%" : "90%",
-                      marginBottom: isTwoColumns ? 0 : 20,
-                    },
-                  ]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    onEmotionSafePress({ id: emotion.id, name: emotion.name, color: emotion.color });
-                  }}
-                  accessible
+                  id={emotion.id}
+                  name={emotion.name}
+                  color={emotion.color}
+                  imageUrl={getArasaacImageUrl(emotion.id)}
+                  style={styles.emotionContainer}
+                  imageStyle={styles.emotionImage}
+                  textStyle={styles.emotionText}
+                  onPress={onEmotionSafePress}
                   accessibilityLabel={`Emoción: ${emotion.name}`}
-                  accessibilityRole="button"
-                >
-                  <Image
-                    source={{ uri: getArasaacImageUrl(emotion.id) }}
-                    style={[
-                      styles.emotionImage,
-                      { width: isTwoColumns ? 125 : 100, height: isTwoColumns ? 125 : 100 },
-                    ]}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.emotionText}>{emotion.name}</Text>
-                </TouchableOpacity>
+                />
               ))}
             </View>
           ))}
@@ -113,7 +102,9 @@ export default function Screen1() {
         visible={open && !!selected}
         onClose={() => setOpen(false)}
         label={selected ? `Estoy ${selected.name}` : ""}
-        imageSource={selected ? { uri: getArasaacImageUrl(selected.id) } : undefined}
+        imageSource={
+          selected ? { uri: getArasaacImageUrl(selected.id) } : undefined
+        }
         color={selected?.color}
         autoCloseMs={5000}
         speakOnOpen
@@ -126,8 +117,17 @@ export default function Screen1() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
   content: { padding: 20, alignItems: "center" },
-  title: { fontWeight: "bold", marginBottom: 30, textAlign: "center", color: "#333" },
-  emotionRow: { justifyContent: "space-around", width: "100%", marginBottom: 20 },
+  title: {
+    fontWeight: "bold",
+    marginBottom: 30,
+    textAlign: "center",
+    color: "#333",
+  },
+  emotionRow: {
+    justifyContent: "space-around",
+    width: "100%",
+    marginBottom: 20,
+  },
   emotionContainer: {
     alignItems: "center",
     padding: 15,
@@ -139,7 +139,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     minHeight: 150,
     justifyContent: "center",
+    marginHorizontal: 8,
   },
   emotionImage: { marginBottom: 10 },
-  emotionText: { fontSize: 22, fontWeight: "bold", textAlign: "center", color: "#333", marginTop: 5 },
+  emotionText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#333",
+    marginTop: 5,
+  },
 });

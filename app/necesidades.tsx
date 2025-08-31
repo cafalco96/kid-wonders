@@ -1,14 +1,12 @@
+import { OptionButton } from "@/components/OptionButton";
 import PictogramModal from "@/components/PictogramModal";
 import { useOneTap } from "@/hooks/useOneTap";
-import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
@@ -19,7 +17,7 @@ const needs = [
   { id: 6061, name: "Agua", color: "#4FC3F7" },
   { id: 7257, name: "Dormir", color: "#9575CD" },
   { id: 16709, name: "Baño", color: "#4DB6AC" },
-  { id: 6627, name: "Cambio de Ropa", color: "#F06292" },
+  { id: 6627, name: "Vestirme", color: "#F06292" },
   { id: 19524, name: "Ayuda", color: "#90A4AE" },
   { id: 34569, name: "Abrigo", color: "#A1887F" },
   { id: 6537, name: "Jugar", color: "#FFD54F" },
@@ -31,7 +29,11 @@ export default function Screen1() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: number; name: string; color: string } | null>(null);
+  const [selected, setSelected] = useState<{
+    id: number;
+    name: string;
+    color: string;
+  } | null>(null);
 
   // OneTap para evitar doble toque
   const { onPress: onEmotionSafePress } = useOneTap(
@@ -68,37 +70,24 @@ export default function Screen1() {
               ]}
             >
               {pair.map((need) => (
-                <TouchableOpacity
+                <OptionButton
                   key={need.id}
-                  style={[
-                    styles.emotionContainer,
+                  id={need.id}
+                  name={need.name}
+                  color={need.color}
+                  imageUrl={getArasaacImageUrl(need.id)}
+                  style={styles.emotionContainer}
+                  imageStyle={[
+                    styles.emotionImage,
                     {
-                      backgroundColor: need.color,
-                      width: isLargeScreen ? "45%" : "90%",
-                      marginBottom: isLargeScreen ? 0 : 20,
+                      width: isLargeScreen ? 125 : 100,
+                      height: isLargeScreen ? 125 : 100,
                     },
                   ]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    onEmotionSafePress({ id: need.id, name: need.name, color: need.color });
-                  }}
-                  accessible={true}
+                  textStyle={styles.emotionText}
+                  onPress={onEmotionSafePress}
                   accessibilityLabel={`Necesidad: ${need.name}`}
-                  accessibilityRole="button"
-                >
-                  <Image
-                    source={{ uri: getArasaacImageUrl(need.id) }}
-                    style={[
-                      styles.emotionImage,
-                      {
-                        width: isLargeScreen ? 125 : 100,
-                        height: isLargeScreen ? 125 : 100,
-                      },
-                    ]}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.emotionText}>{need.name}</Text>
-                </TouchableOpacity>
+                />
               ))}
             </View>
           ))}
@@ -152,6 +141,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     minHeight: 150,
     justifyContent: "center",
+    marginHorizontal: 8, 
   },
   emotionImage: {
     marginBottom: 10,
