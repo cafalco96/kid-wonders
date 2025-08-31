@@ -1,6 +1,7 @@
 // app/screen1.tsx
-import React, { useState } from "react";
+import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   Image,
   ScrollView,
@@ -37,11 +38,11 @@ export default function Screen1() {
 
   // Estado para el modal
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: number; name: string } | null>(null);
+  const [selected, setSelected] = useState<{ id: number; name: string; color: string } | null>(null);
 
   // OneTap para evitar doble toque
   const { onPress: onEmotionSafePress } = useOneTap(
-    (e: { id: number; name: string }) => {
+    (e: { id: number; name: string; color: string }) => {
       setSelected(e);
       setOpen(true);
     },
@@ -83,7 +84,10 @@ export default function Screen1() {
                       marginBottom: isTwoColumns ? 0 : 20,
                     },
                   ]}
-                  onPress={() => onEmotionSafePress({ id: emotion.id, name: emotion.name })}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    onEmotionSafePress({ id: emotion.id, name: emotion.name, color: emotion.color });
+                  }}
                   accessible
                   accessibilityLabel={`Emoción: ${emotion.name}`}
                   accessibilityRole="button"
@@ -101,12 +105,6 @@ export default function Screen1() {
               ))}
             </View>
           ))}
-
-          <TouchableOpacity onPress={useOneTap(() => router.back()).onPress} style={{ marginTop: 24 }}>
-            <Text style={{ fontSize: 18, textDecorationLine: "underline", color: "#333" }}>
-              Volver
-            </Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -116,6 +114,7 @@ export default function Screen1() {
         onClose={() => setOpen(false)}
         label={selected ? `Estoy ${selected.name}` : ""}
         imageSource={selected ? { uri: getArasaacImageUrl(selected.id) } : undefined}
+        color={selected?.color}
         autoCloseMs={5000}
         speakOnOpen
         speechLang="es-ES"
